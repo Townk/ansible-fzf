@@ -1,0 +1,25 @@
+galaxy_info:
+  role_name: fzf
+  author: Thiago Alves
+  description: Installs and configure fzf for ZSH
+
+  license: MIT
+
+  min_ansible_version: 2.9
+
+  platforms:
+    - name: macOS
+      versions:
+        - 10.14.6 (Mojave)
+    - name: MacOSX
+      versions:
+        - 10.14.6 (Mojave)
+
+  galaxy_tags:
+    - shell
+    - utility
+    - fzf
+    - fuzzy
+  
+  dependencies:
+    - townk.shell-tools

@@ -1,0 +1,109 @@
+# MIT License
+# 
+# Copyright (c) 2019 Thiago Alves
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+---
+- name: Provisioning fzf
+  include_role:
+    name: townk.shell-tools
+  vars:
+    tools:
+      - name: fzf
+        command: fzf
+        state: "{{ state }}"
+        install:
+          force: "{{ force }}"
+          target_tree:
+            - bin
+            - share/man/man1
+            - share/zsh/bindings
+            - share/zsh/functions
+            - share/zsh/plugins
+          sources:
+            - name: junegunn/fzf
+              type: github
+              retrieveby: clone
+            - name: junegunn/fzf-bin
+              type: github
+              retrieveby: asset
+              matching_rules:
+                - name: fzf-{version}-darwin_amd64.tgz
+                  ostype: Darwin
+                  osarch: x86_64
+                - name: fzf-{version}-darwin_386.tgz
+                  ostype: Darwin
+                - name: fzf-{version}-linux_amd64.tgz
+                  osarch: x86_64
+                - name: fzf-{version}-linux_386.tgz
+            - name: _gen_fzf_default_opts
+              type: download
+              url: https://raw.githubusercontent.com/nicodebo/base16-fzf/master/bash/base16-tomorrow-night.config
+          actions:
+            - name: copy
+              source: "fzf"
+              destination: bin
+              mode: "u+rwx"
+            - name: copy
+              source: "bin/fzf-tmux"
+              destination: bin
+              mode: "u+rwx"
+            - name: copy
+              source: "man/man1/fzf*"
+              destination: share/man/man1
+              mode: "u+rw"
+            - name: copy
+              source: "_gen_fzf_default_opts"
+              destination: share/zsh/functions/_gen_fzf_default_opts
+              mode: "u+rw"
+            - name: template
+              destination: share/zsh/plugins/fzf.plugin.zsh
+              vars:
+                file:
+                  name: shell/completion.zsh
+                  source: install
+                extras: "{{ lookup('file', 'extra-config.zsh') }}"
+            - name: template
+              destination: share/zsh/bindings/fzf.bindings.zsh
+              vars:
+                setup: |-
+                  ## remove bindings we will use
+                  bindkey -r '^R'
+                  bindkey -r '^T'
+                  bindkey -r '\e/'
+                  bindkey -r '\e?'
+                  bindkey -r '\ec'
+                file:
+                  name: shell/key-bindings.zsh
+                  source: install
+                extras: |-
+                  ## Shell integration
+                  bindkey '^I' fzf-completion
+                  bindkey -M viins '^R' fzf-history-widget
+                  bindkey -M vicmd '^R' fzf-history-widget
+                  bindkey -M vicmd '?' fzf-history-widget
+                  bindkey -M vicmd '/' fzf-history-widget
+                  if $(whence git >/dev/null); then
+                      bindkey '^G^F' fzf-gf-widget # get files
+                      bindkey '^G^C' fzf-gc-widget # get changed files
+                      bindkey '^G^B' fzf-gb-widget # get branches
+                      bindkey '^G^T' fzf-gt-widget # get tags
+                      bindkey '^G^H' fzf-gh-widget # get sha from history
+                      bindkey '^G^R' fzf-gr-widget # get remotes
+                  fi
