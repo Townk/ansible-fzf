@@ -22,7 +22,7 @@
 ---
 - name: Provisioning fzf
   include_role:
-    name: townk.shell-tools
+    name: townk.shell_tools
   vars:
     tools:
       - name: fzf

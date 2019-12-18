@@ -22,4 +22,4 @@ galaxy_info:
     - fuzzy
   
   dependencies:
-    - townk.shell-tools
+    - townk.shell_tools
